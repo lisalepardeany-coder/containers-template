@@ -1,24 +1,29 @@
-# syntax=docker/dockerfile:1
+FROM node:22-bookworm-slim
 
-FROM golang:1.24-alpine AS build
+RUN apt-get update && apt-get install -y \
+    ffmpeg python3 curl git \
+ && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp \
+         -o /usr/local/bin/yt-dlp \
+ && chmod +x /usr/local/bin/yt-dlp \
+ && rm -rf /var/lib/apt/lists/*
 
-# Set destination for COPY
 WORKDIR /app
 
-# Download any Go modules
-COPY container_src/go.mod ./
-RUN go mod download
+RUN git clone --depth=1 https://github.com/lisalepardeany-coder/maowcore.git .
 
-# Copy container source code
-COPY container_src/*.go ./
+RUN npm ci --omit=dev
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux go build -o /server
+RUN mkdir -p data && chown -R node:node /app
 
-FROM scratch
-COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=build /server /server
-EXPOSE 8080
+ENV FFMPEG_PATH=/usr/bin/ffmpeg
+ENV YTDLP_DIR=/usr/local/bin
+ENV YTDLP_FILENAME=yt-dlp
+ENV CONTROL_HOST=0.0.0.0
+ENV CONTROL_PORT=8765
+ENV NODE_ENV=production
 
-# Run
-CMD ["/server"]
+USER node
+EXPOSE 8765
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s \
+  CMD node -e "require('http').get('http://127.0.0.1:8765/api/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"
+CMD ["node", "index.js"]
