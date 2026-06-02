@@ -11,7 +11,7 @@ WORKDIR /app
 
 RUN git clone --depth=1 https://github.com/lisalepardeany-coder/maowcore.git .
 
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 RUN mkdir -p data && chown -R node:node /app
 
