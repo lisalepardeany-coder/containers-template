@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+ARG CACHE_BUST=1
 RUN git clone --depth=1 https://github.com/lisalepardeany-coder/maowcore.git .
 
 RUN npm install --omit=dev
