@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "maowcore",
+	"name": "containers-template",
 	"main": "src/index.ts",
 	"compatibility_date": "2025-10-08",
 	"compatibility_flags": ["nodejs_compat"],
@@ -12,7 +12,7 @@
 	},
 	"containers": [
 		{
-			"class_name": "MaowCoreContainer",
+			"class_name": "MyContainer",
 			"image": "./Dockerfile",
 			"max_instances": 1
 		}
@@ -20,14 +20,14 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "MaowCoreContainer",
+				"class_name": "MyContainer",
 				"name": "MAOW_CONTAINER"
 			}
 		]
 	},
 	"migrations": [
 		{
-			"new_sqlite_classes": ["MaowCoreContainer"],
+			"new_sqlite_classes": ["MyContainer"],
 			"tag": "v1"
 		}
 	],

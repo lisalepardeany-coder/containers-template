@@ -4,10 +4,10 @@
 declare namespace Cloudflare {
 	interface GlobalProps {
 		mainModule: typeof import("./src/index");
-		durableNamespaces: "MaowCoreContainer";
+		durableNamespaces: "MyContainer";
 	}
 	interface Env {
-		MAOW_CONTAINER: DurableObjectNamespace<import("./src/index").MaowCoreContainer>;
+		MAOW_CONTAINER: DurableObjectNamespace<import("./src/index").MyContainer>;
 		DISCORD_TOKEN: string;
 		CLIENT_ID: string;
 		CONTROL_TOKEN: string;

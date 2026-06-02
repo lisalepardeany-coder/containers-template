@@ -1,6 +1,6 @@
 import { Container, getContainer } from "@cloudflare/containers";
 
-export class MaowCoreContainer extends Container<Env> {
+export class MyContainer extends Container<Env> {
 	defaultPort = 8765;
 	sleepAfter = "10m";
 
