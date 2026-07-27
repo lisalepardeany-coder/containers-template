@@ -7,7 +7,11 @@ declare namespace Cloudflare {
 		durableNamespaces: "MyContainer";
 	}
 	interface Env {
-		MY_CONTAINER: DurableObjectNamespace<import("./src/index").MyContainer>;
+		MAOW_CONTAINER: DurableObjectNamespace<import("./src/index").MyContainer>;
+		DISCORD_TOKEN: string;
+		CLIENT_ID: string;
+		CONTROL_TOKEN: string;
+		DISCORD_CLIENT_SECRET: string;
 	}
 }
 interface Env extends Cloudflare.Env {}

@@ -1,70 +1,39 @@
-import { Container, getContainer, getRandom } from "@cloudflare/containers";
-import { Hono } from "hono";
+import { Container, getContainer } from "@cloudflare/containers";
 
 export class MyContainer extends Container<Env> {
-	// Port the container listens on (default: 8080)
-	defaultPort = 8080;
-	// Time before container sleeps due to inactivity (default: 30s)
-	sleepAfter = "2m";
-	// Environment variables passed to the container
-	envVars = {
-		MESSAGE: "I was passed in via the container class!",
-	};
+	defaultPort = 8765;
+	sleepAfter = "10m";
 
-	// Optional lifecycle hooks
-	override onStart() {
-		console.log("Container successfully started");
+	get envVars() {
+		return {
+			CONTROL_HOST: "0.0.0.0",
+			CONTROL_PORT: "8765",
+			DISCORD_TOKEN: this.env.DISCORD_TOKEN,
+			CLIENT_ID: this.env.CLIENT_ID,
+			CONTROL_TOKEN: this.env.CONTROL_TOKEN,
+			DISCORD_CLIENT_ID: this.env.CLIENT_ID,
+			DISCORD_CLIENT_SECRET: this.env.DISCORD_CLIENT_SECRET,
+			BOT_INSTANCE_NAME: "MaowCore",
+		};
 	}
 
-	override onStop() {
-		console.log("Container successfully shut down");
+	override onStart() {
+		console.log("MaowCore container started");
 	}
 
 	override onError(error: unknown) {
-		console.log("Container error:", error);
+		console.error("MaowCore container error:", error);
 	}
 }
 
-// Create Hono app with proper typing for Cloudflare Workers
-const app = new Hono<{
-	Bindings: Env;
-}>();
+export default {
+	async fetch(request: Request, env: Env): Promise<Response> {
+		const container = getContainer(env.MAOW_CONTAINER);
+		return container.fetch(request);
+	},
 
-// Home route with available endpoints
-app.get("/", (c) => {
-	return c.text(
-		"Available endpoints:\n" +
-			"GET /container/<ID> - Start a container for each ID with a 2m timeout\n" +
-			"GET /lb - Load balance requests over multiple containers\n" +
-			"GET /error - Start a container that errors (demonstrates error handling)\n" +
-			"GET /singleton - Get a single specific container instance",
-	);
-});
-
-// Route requests to a specific container using the container ID
-app.get("/container/:id", async (c) => {
-	const id = c.req.param("id");
-	const containerId = c.env.MY_CONTAINER.idFromName(`/container/${id}`);
-	const container = c.env.MY_CONTAINER.get(containerId);
-	return await container.fetch(c.req.raw);
-});
-
-// Demonstrate error handling - this route forces a panic in the container
-app.get("/error", async (c) => {
-	const container = getContainer(c.env.MY_CONTAINER, "error-test");
-	return await container.fetch(c.req.raw);
-});
-
-// Load balance requests across multiple containers
-app.get("/lb", async (c) => {
-	const container = await getRandom(c.env.MY_CONTAINER, 3);
-	return await container.fetch(c.req.raw);
-});
-
-// Get a single container instance (singleton pattern)
-app.get("/singleton", async (c) => {
-	const container = getContainer(c.env.MY_CONTAINER);
-	return await container.fetch(c.req.raw);
-});
-
-export default app;
+	async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+		const container = getContainer(env.MAOW_CONTAINER);
+		await container.fetch(new Request("http://internal/api/health"));
+	},
+};

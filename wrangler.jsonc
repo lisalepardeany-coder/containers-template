@@ -7,18 +7,21 @@
 	"observability": {
 		"enabled": true
 	},
+	"triggers": {
+		"crons": ["*/2 * * * *"]
+	},
 	"containers": [
 		{
 			"class_name": "MyContainer",
 			"image": "./Dockerfile",
-			"max_instances": 10
+			"max_instances": 1
 		}
 	],
 	"durable_objects": {
 		"bindings": [
 			{
 				"class_name": "MyContainer",
-				"name": "MY_CONTAINER"
+				"name": "MAOW_CONTAINER"
 			}
 		]
 	},
